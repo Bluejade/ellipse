@@ -39,8 +39,8 @@ class Ellipse
 
   private
   
-  def cumulative_distances
-    @cumulative_distances ||= compute_cumulative_distances
+  def cumulative_distances(precision=1.0)
+    @cumulative_distances ||= compute_cumulative_distances(precision)
   end
 
   def compute_circumference
@@ -50,11 +50,11 @@ class Ellipse
     Math::PI * (@a + @b) * (1 + a_b_block / (10 + Math.sqrt(4 - a_b_block)))
   end
 
-  def compute_cumulative_distances
+  def compute_cumulative_distances(precision)
     cumulative_distances = [0.0]
     
     # 180 gives for every 1 degree, 360 for every half degree
-    segments = 720
+    segments = (180 * precision).to_i
     delta_theta = Math::PI / segments
 
     previous_x = @a
