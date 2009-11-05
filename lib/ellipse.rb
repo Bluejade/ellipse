@@ -54,7 +54,7 @@ class Ellipse
     cumulative_distances = [0.0]
     
     # 180 gives for every 1 degree, 360 for every half degree
-    segments = 360
+    segments = 720
     delta_theta = Math::PI / segments
 
     previous_x = @a
