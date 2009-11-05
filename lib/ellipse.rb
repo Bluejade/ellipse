@@ -23,8 +23,8 @@ class Ellipse
   end
 
   # arc_length is length from x=a, y=0 to 
-  def angle_from_arc(arc_length)
-    index = cumulative_distances.closest_index(arc_length)
+  def angle_from_arc(arc_length, precision=1.0)
+    index = cumulative_distances(precision).closest_index(arc_length)
     @cumulative_distance_angles[index]
   end
 
@@ -39,7 +39,7 @@ class Ellipse
 
   private
   
-  def cumulative_distances(precision=1.0)
+  def cumulative_distances(precision)
     @cumulative_distances ||= compute_cumulative_distances(precision)
   end
 
