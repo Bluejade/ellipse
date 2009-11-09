@@ -22,9 +22,11 @@ class Ellipse
     @circumference ||= compute_circumference
   end
 
-  # arc_length is length from x=a, y=0 to 
-  def angle_from_arc(arc_length, precision=1.0)
-    index = cumulative_distances(precision).closest_index(arc_length)
+  # arc_length is length from offset_angle around the ellipse in
+  # counter-clockwise direction
+  # offset_angle is in radians
+  def angle_from_arc(arc_length, offset_angle=0.0, precision=1.0)
+    index = cumulative_distances(precision, offset_angle).closest_index(arc_length)
     @cumulative_distance_angles[index]
   end
 
@@ -39,8 +41,12 @@ class Ellipse
 
   private
   
-  def cumulative_distances(precision)
-    @cumulative_distances ||= compute_cumulative_distances(precision)
+  def cumulative_distances(precision, offset_angle)
+    # If last computed cumulative distances was at the same offset
+    # angle, then use the existing computation if it exists
+    return @cumulative_distances if @cumulative_distances && @offset_angle == offset_angle
+    @offset_angle = offset_angle
+    @cumulative_distances = compute_cumulative_distances(precision, offset_angle)
   end
 
   def compute_circumference
@@ -50,29 +56,29 @@ class Ellipse
     Math::PI * (@a + @b) * (1 + a_b_block / (10 + Math.sqrt(4 - a_b_block)))
   end
 
-  def compute_cumulative_distances(precision)
+  def compute_cumulative_distances(precision, offset_angle)
     cumulative_distances = [0.0]
     
     # 180 gives for every 1 degree, 360 for every half degree
     segments = (180 * precision).to_i
     delta_theta = Math::PI / segments
 
-    previous_x = @a
-    previous_y = 0
+    previous_x, previous_y = coords_from_angle(offset_angle)
     segments.times do |i|
-      x, y = coords_from_angle(delta_theta * (i + 1))
+      x, y = coords_from_angle(offset_angle + delta_theta * (i + 1))
       distance = Math.sqrt((y - previous_y)**2 + (x - previous_x)**2)
       cumulative_distances << cumulative_distances.last + distance
       previous_x = x
       previous_y = y
     end
+    half_circumference = cumulative_distances[segments]
     segments.times do |i|
-      cumulative_distances << cumulative_distances[i + 1] + cumulative_distances[segments]
+      cumulative_distances << cumulative_distances[i + 1] + half_circumference
     end
     
     @cumulative_distance_angles = []
-    (segments * 4 + 1).times do |i|
-      @cumulative_distance_angles << delta_theta * i
+    (segments * 2 + 1).times do |i|
+      @cumulative_distance_angles << (offset_angle + delta_theta * i) % (2.0 * Math::PI)
     end
     
     cumulative_distances

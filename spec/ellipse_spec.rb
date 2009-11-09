@@ -21,7 +21,22 @@ describe Ellipse do
     end
     it 'should be close to 2 * Pi when arc_length is equal to the circumference' do
       ellipse = Ellipse.new(7, 9)
-      ellipse.angle_from_arc(ellipse.circumference).should be_close(2 * Math::PI, 0.01)
+      ellipse.angle_from_arc(ellipse.circumference).should be_close(0, 0.01)
+    end
+  end
+  
+  describe '#angle_from_arc(arc_length, -Pi / 2)' do
+    it 'should be close to 0 when arc_length is 0' do
+      ellipse = Ellipse.new(7, 9)
+      ellipse.angle_from_arc(0, -1 * Math::PI / 2).should be_close(3 * Math::PI / 2, 0.01)
+    end
+    it 'should be close to Pi when arc_length is half the circumference' do
+      ellipse = Ellipse.new(7, 9)
+      ellipse.angle_from_arc(ellipse.circumference * 0.5, -1 * Math::PI / 2).should be_close(Math::PI / 2, 0.01)
+    end
+    it 'should be close to 2 * Pi when arc_length is equal to the circumference' do
+      ellipse = Ellipse.new(7, 9)
+      ellipse.angle_from_arc(ellipse.circumference, -1 * Math::PI / 2).should be_close(3 * Math::PI / 2, 0.01)
     end
   end
 
@@ -55,6 +70,12 @@ describe Ellipse do
       x, y = ellipse.coords_from_angle(2 * Math::PI)
       x.should be_close(9, 0.01)
       y.should be_close(0, 0.01)
+    end
+    it 'should be close to [0, -b] when theta is -1 * Pi / 2' do
+      ellipse = Ellipse.new(9, 7)
+      x, y = ellipse.coords_from_angle(-1 * Math::PI * 0.5)
+      x.should be_close(0, 0.01)
+      y.should be_close(-7, 0.01)
     end
   end
 end
